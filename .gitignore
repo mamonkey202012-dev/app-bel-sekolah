@@ -9,3 +9,10 @@ __pycache__/
 .DS_Store
 Thumbs.db
 *.bak
+
+# Data Lokal & Audio Server (Jangan timpa data produksi Armbian saat git pull)
+data/*.db
+data/*.sqlite*
+static/audio/*.mp3
+static/audio/*.wav
+static/audio/*.ogg

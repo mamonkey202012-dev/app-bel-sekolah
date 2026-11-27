@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kontroler Bel Sekolah Otomatis (WITA)</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            background: #0f172a;
+            color: #f8fafc;
+            margin: 0;
+            padding: 0;
+        }
+
+        .navbar {
+            background: #1e293b;
+            border-bottom: 1px solid #334155;
+            padding: 10px 14px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            justify-content: center;
+        }
+
+        .nav-btn {
+            background: #0f172a;
+            color: #cbd5e1;
+            border: 1px solid #334155;
+            padding: 8px 12px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .nav-btn:hover,
+        .nav-btn.active {
+            background: #2563eb;
+            color: #fff;
+            border-color: #2563eb;
+        }
+
+        .container {
+            max-width: 820px;
+            margin: 0 auto;
+            padding: 14px;
+        }
+
+        .card {
+            background: #1e293b;
+            border-radius: 10px;
+            padding: 16px;
+            margin-bottom: 14px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+        }
+
+        .clock {
+            font-size: 2.5rem;
+            font-weight: bold;
+            text-align: center;
+            color: #38bdf8;
+            letter-spacing: 1.5px;
+        }
+
+        .sub {
+            text-align: center;
+            color: #cbd5e1;
+            margin: 6px 0 14px;
+            font-size: 0.95rem;
+        }
+
+        .btn {
+            padding: 12px 14px;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 0.95rem;
+        }
+
+        .btn-mode {
+            background: #ef4444;
+            color: #fff;
+            width: 100%;
+            font-size: 1.05rem;
+            margin-bottom: 8px;
+        }
+
+        .btn-mode.aktif {
+            background: #16a34a;
+        }
+
+        .btn-primary {
+            background: #2563eb;
+            color: #fff;
+        }
+
+        .btn-warn {
+            background: #d97706;
+            color: #fff;
+        }
+
+        .btn-danger {
+            background: #dc2626;
+            color: #fff;
+        }
+
+        .btn-teal {
+            background: #0d9488;
+            color: #fff;
+        }
+
+        .btn-sm {
+            padding: 6px 10px;
+            font-size: 0.8rem;
+            margin: 2px;
+        }
+
+        .row-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .quick-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        input,
+        select {
+            width: 100%;
+            padding: 10px;
+            margin: 5px 0 12px;
+            border-radius: 6px;
+            border: 1px solid #334155;
+            background: #0f172a;
+            color: #fff;
+            box-sizing: border-box;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+
+        th,
+        td {
+            padding: 10px 6px;
+            border-bottom: 1px solid #334155;
+            text-align: left;
+        }
+
+        .badge {
+            padding: 3px 8px;
+            border-radius: 99px;
+            font-size: 0.75rem;
+        }
+
+        .on {
+            background: #166534;
+            color: #bbf7d0;
+        }
+
+        .off {
+            background: #7f1d1d;
+            color: #fecaca;
+        }
+
+        /* Mode Khusus Tablet Android (?mode=speaker) */
+        body.speaker-mode .admin-only {
+            display: none !important;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- NAVBAR KHUSUS SERVER UTAMA / ADMIN -->
+    <nav class="navbar admin-only">
+        <a href="#sec-status" class="nav-btn">🏠 Status & Kontrol</a>
+        <a href="#sec-quick" class="nav-btn">🔔 Bel Manual</a>
+        <a href="#sec-audio" class="nav-btn">🎵 Bank Audio</a>
+        <a href="#sec-excel" class="nav-btn">📊 Import Excel</a>
+        <a href="#sec-tambah" class="nav-btn">➕ Tambah Jadwal</a>
+        <a href="#sec-salin" class="nav-btn">📋 Salin Hari</a>
+        <a href="#sec-daftar" class="nav-btn">📅 Daftar Jadwal</a>
+        <a href="/?mode=speaker" class="nav-btn" style="background:#0f766e; border-color:#0f766e; color:#fff;">🔊
+            Tampilan Tablet</a>
+    </nav>
+
+    <div class="container">
+
+        <!-- PANEL STATUS, AKTIVASI SPEAKER & TOMBOL STOP -->
+        <div id="sec-status" class="card">
+            <div class="clock" id="clock">00:00:00 WITA</div>
+            <div class="sub" id="hariIni">Memuat waktu WITA...</div>
+
+            <button id="btnTerminal" class="btn btn-mode" onclick="aktifkanTerminalAudio()">
+                🔇 KLIK DI SINI PADA TABLET ANDROID UNTUK AKTIFKAN SPEAKER
+            </button>
+
+            <div class="row-grid" id="gridKontrolUtama">
+                <button id="btnLibur" class="btn btn-primary admin-only" onclick="toggleLibur()">📅 Mode Libur:
+                    NONAKTIF</button>
+                <button id="btnStopUtama" class="btn btn-danger" onclick="hentikanSuaraSekarang()">⏹️ Hentikan Suara
+                    Sekarang</button>
+            </div>
+
+            <p id="statusBunyi" style="text-align:center; color:#fbbf24; font-weight:bold; margin:12px 0 0;"></p>
+        </div>
+
+        <!-- PANEL BEL MANUAL / CEPAT (TAMPIL DI ADMIN & TABLET KLIEN) -->
+        <div id="sec-quick" class="card">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <h3 style="margin:0;">🔔 Bel Manual / Bunyi Cepat</h3>
+                <small style="color:#94a3b8;">Klik tombol untuk membunyikan seketika</small>
+            </div>
+            <div id="quickBellGrid" class="quick-grid">
+                <small style="color:#94a3b8;">Memuat daftar audio...</small>
+            </div>
+        </div>
+
+        <!-- LANGKAH 1: BANK AUDIO MULTI-UPLOAD (KHUSUS ADMIN) -->
+        <div id="sec-audio" class="card admin-only">
+            <h3>1. Bank Audio Bel (Upload Banyak File MP3 Sekaligus)</h3>
+            <p style="font-size:0.85rem; color:#94a3b8; margin-top:0;">
+                Pilih seluruh file MP3 bel sekaligus sebelum mengimpor jadwal Excel. Nama file otomatis dirapikan (spasi
+                menjadi garis bawah <code>_</code>).
+            </p>
+            <form id="formMultiAudio">
+                <label>Pilih Banyak File Audio (.mp3 / .wav / .ogg)</label>
+                <input type="file" name="files_audio" accept="audio/*" multiple required>
+                <button type="submit" class="btn btn-primary" style="width:100%;">🎵 Upload Semua File Audio</button>
+            </form>
+
+            <div style="margin-top:14px;">
+                <strong style="font-size:0.9rem; color:#cbd5e1;">Daftar File Audio Tersimpan di Server:</strong>
+                <div id="daftarAudioTersimpan" style="margin-top:8px; display:flex; flex-wrap:wrap; gap:6px;"></div>
+            </div>
+        </div>
+
+        <!-- LANGKAH 2: IMPORT MASSAL VIA EXCEL (KHUSUS ADMIN) -->
+        <div id="sec-excel" class="card admin-only">
+            <h3>2. Import Jadwal Massal via Excel (.xlsx)</h3>
+            <p style="font-size:0.85rem; color:#94a3b8; margin-top:0;">
+                Unduh format tabel Excel, isi jadwal Senin–Sabtu (zona waktu WITA) sesuai nama file audio di atas, lalu
+                unggah kembali.
+            </p>
+            <a href="/api/template-excel" class="btn btn-warn"
+                style="display:inline-block; text-decoration:none; margin-bottom:12px;">
+                📥 Download Format Excel (.xlsx)
+            </a>
+
+            <form id="formExcel">
+                <label>Pilih File Excel Jadwal (.xlsx)</label>
+                <input type="file" name="file_excel" accept=".xlsx" required>
+
+                <label>Mode Penyimpanan</label>
+                <select name="mode">
+                    <option value="tambah">Tambahkan ke jadwal yang sudah ada</option>
+                    <option value="timpa">Hapus semua jadwal lama & ganti dengan isi Excel ini</option>
+                </select>
+
+                <button type="submit" class="btn btn-primary" style="width:100%;">📤 Upload & Simpan Jadwal
+                    Excel</button>
+            </form>
+        </div>
+
+        <!-- TAMBAH JADWAL SATUAN (KHUSUS ADMIN) -->
+        <div id="sec-tambah" class="card admin-only">
+            <h3>3. Tambah Jadwal Satuan</h3>
+            <form id="formJadwal">
+                <div class="row-grid">
+                    <div>
+                        <label>Hari</label>
+                        <select name="hari" required>
+                            <option value="Senin">Senin</option>
+                            <option value="Selasa">Selasa</option>
+                            <option value="Rabu">Rabu</option>
+                            <option value="Kamis">Kamis</option>
+                            <option value="Jumat">Jumat</option>
+                            <option value="Sabtu">Sabtu</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label>Jam WITA (24 Jam)</label>
+                        <input type="time" name="jam" required>
+                    </div>
+                </div>
+
+                <label>Keterangan</label>
+                <input type="text" name="keterangan" placeholder="Contoh: Bel Masuk / Istirahat / Pulang" required>
+
+                <label>Upload File MP3 Baru (Opsional)</label>
+                <input type="file" name="file_mp3" accept="audio/*">
+
+                <label>Atau Pilih Audio Tersimpan di Server</label>
+                <select name="file_audio_existing" id="selectAudio">
+                    <option value="">-- Pilih Audio Tersimpan --</option>
+                </select>
+
+                <button type="submit" class="btn btn-primary" style="width:100%;">Simpan Jadwal</button>
+            </form>
+        </div>
+
+        <!-- SALIN JADWAL ANTAR HARI (KHUSUS ADMIN) -->
+        <div id="sec-salin" class="card admin-only">
+            <h3>4. Salin Jadwal Antar Hari</h3>
+            <div class="row-grid">
+                <div>
+                    <label>Dari Hari</label>
+                    <select id="salinDari">
+                        <option value="Selasa">Selasa</option>
+                        <option value="Senin">Senin</option>
+                        <option value="Rabu">Rabu</option>
+                        <option value="Kamis">Kamis</option>
+                        <option value="Jumat">Jumat</option>
+                        <option value="Sabtu">Sabtu</option>
+                    </select>
+                </div>
+                <div>
+                    <label>Ke Hari</label>
+                    <select id="salinKe">
+                        <option value="Rabu">Rabu</option>
+                        <option value="Kamis">Kamis</option>
+                        <option value="Senin">Senin</option>
+                        <option value="Selasa">Selasa</option>
+                        <option value="Jumat">Jumat</option>
+                        <option value="Sabtu">Sabtu</option>
+                    </select>
+                </div>
+            </div>
+            <button class="btn btn-warn" style="width:100%;" onclick="salinJadwalHari()">Salin Semua Jadwal</button>
+        </div>
+
+        <!-- TABEL DAFTAR JADWAL (TAMPIL DI ADMIN & TABLET KLIEN) -->
+        <div id="sec-daftar" class="card">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                <h3 style="margin:0;" id="judulDaftarJadwal">Daftar Jadwal Bel</h3>
+                <select id="filterHari" onchange="muatData()" style="width:auto; margin:0;">
+                    <option value="HARI_INI">Hari Ini</option>
+                    <option value="SEMUA">Semua Hari</option>
+                    <option value="Senin">Senin</option>
+                    <option value="Selasa">Selasa</option>
+                    <option value="Rabu">Rabu</option>
+                    <option value="Kamis">Kamis</option>
+                    <option value="Jumat">Jumat</option>
+                    <option value="Sabtu">Sabtu</option>
+                </select>
+            </div>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Hari & Jam</th>
+                        <th>Keterangan</th>
+                        <th>Status</th>
+                        <th>Kontrol</th>
+                    </tr>
+                </thead>
+                <tbody id="tabelJadwal"></tbody>
+            </table>
+        </div>
+
+    </div>
+
+    <audio id="mainPlayer" preload="auto"></audio>
+    <audio id="keepAlivePlayer" loop></audio>
+    <script src="/static/js/bell-engine.js"></script>
+</body>
+
+</html>
